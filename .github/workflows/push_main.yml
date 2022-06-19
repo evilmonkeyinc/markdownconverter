@@ -1,0 +1,136 @@
+name: Push Main
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '**.go'
+      - 'go.mod'
+jobs:
+  test:
+    strategy:
+      matrix:
+        go-version: ['1.17']
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+    - name: Install Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: ${{ matrix.go-version }}
+    - name: Checkout code
+      uses: actions/checkout@v2
+    - name: Install dependencies
+      run: |
+        go version
+        go mod download
+    - name: Run Test
+      run: |
+        go test -count=10 ./...
+  lint:
+    strategy:
+      matrix:
+        go-version: ['1.17']
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+    - name: Install Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: ${{ matrix.go-version }}
+    - name: Checkout code
+      uses: actions/checkout@v2
+    - name: Install dependencies
+      run: |
+        go install golang.org/x/lint/golint@latest
+        go mod download
+    - name: Run Lint
+      run: |
+        golint -set_exit_status=1 ./...
+  coverage:
+    runs-on: ubuntu-latest
+    needs: [test, lint]
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-go@v2
+      with:
+        go-version: '1.17'
+    - name: Install dependencies
+      run: |
+        go install golang.org/x/lint/golint@latest
+        go mod download
+    - name: Run Test
+      run: |
+        go test -coverprofile=coverage.txt -covermode=atomic -count=10 ./...
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v2
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        files: ./coverage.txt
+        fail_ci_if_error: true
+        verbose: true
+  release_check:  
+    runs-on: ubuntu-latest
+    outputs:
+      git_diff: ${{ steps.output.outputs.git_diff }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Check Diff
+        uses: technote-space/get-diff-action@v6
+        with:
+          PATTERNS: |
+            **/*.go
+            !**/*_test.go
+          FILES: |
+            go.mod
+      - name: Output Diff
+        if: env.GIT_DIFF
+        id: output
+        run: |
+          echo "::set-output name=git_diff::${{ env.GIT_DIFF }}"
+  release:
+    runs-on: ubuntu-latest
+    needs: [test, lint, release_check]
+    if: ${{ needs.release_check.outputs.git_diff }}
+    outputs:
+      version: ${{ steps.release.outputs.version }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: go-semantic-release/action@v1
+        id: release
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          allow-initial-development-versions: true
+          force-bump-patch-version: true
+  build:
+    needs: [release]
+    if: needs.release.outputs.version != ''
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        goos: [linux, windows, darwin]
+        goarch: ["386", amd64, arm64]
+        goversion: ["1.17"]
+        exclude:  
+          - goarch: "386"
+            goos: darwin 
+          - goarch: "386"
+            goos: windows
+          - goarch: arm64
+            goos: windows 
+    steps:
+    - uses: actions/checkout@v2
+    - uses: wangyoucao577/go-release-action@v1.22
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        release_tag: "v${{ needs.release.outputs.version }}"
+        goos: ${{ matrix.goos }}
+        goarch: ${{ matrix.goarch }}
+        goversion: ${{ matrix.goversion }}
+        project_path: "./cmd/"
+        binary_name: "markdownconverter"
+        overwrite: true
+        ldflags: -X "main.Command=markdownconverter" -X "main.Version=${{ needs.release.outputs.version }}" -X "main.OS=${{ matrix.goos }}" -X "main.Arch=${{ matrix.goarch }}"
