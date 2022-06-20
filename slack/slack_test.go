@@ -7,6 +7,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func Test_Converter_Format(t *testing.T) {
+	actual := New().Format()
+	assert.Equal(t, "slack", actual)
+}
+
 func Test_Converter_Parse(t *testing.T) {
 
 	converter := New()

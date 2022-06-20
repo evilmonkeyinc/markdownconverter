@@ -1,6 +1,10 @@
 package http
 
-import "github.com/gomarkdown/markdown"
+import (
+	"strings"
+
+	"github.com/gomarkdown/markdown"
+)
 
 // New returns a new instace of Converter
 func New() *Converter {
@@ -18,5 +22,7 @@ func (converter *Converter) Format() string {
 
 // Parse will parse the standard markdown and return the converted data
 func (converter *Converter) Parse(markdwn []byte) ([]byte, error) {
-	return markdown.ToHTML(markdwn, nil, nil), nil
+	bytes := markdown.ToHTML(markdwn, nil, nil)
+	clean := strings.TrimSpace(string(bytes))
+	return []byte(clean), nil
 }
