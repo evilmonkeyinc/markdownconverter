@@ -2,62 +2,25 @@ package test
 
 import (
 	"bufio"
-	"fmt"
-	"io/ioutil"
-	"os"
 	"os/exec"
-	"runtime"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-)
-
-var (
-	testExecutable string = ""
-	version        string = "test"
-	goos           string = runtime.GOOS
-	goarch         string = runtime.GOARCH
 )
 
 const (
 	helpText string = "markdownconverter is a tool for converting markdown to other formats\n\nUsage:\n\n  markdownconverter [format] [input] [output]\n\nExample:\n\n  markdownconverter slack \"[evilmonkeyinc](https://github.com/evilmonkeyinc)\"\n  > <https://github.com/evilmonkeyinc|evilmonkeyinc>\n\nOptions:\n\n  -f, --format string   The output format\n  -i, --input string    The input source file\n  -o, --output string   The output destination file. optional\n"
 )
 
-func TestMain(m *testing.M) {
-	if err := os.Chdir(".."); err != nil {
-		fmt.Println("failed to move to root directory")
-		panic(err)
+func runCommand(arg ...string) (string, error) {
+
+	runArgs := []string{
+		"run",
+		"../cmd/main.go",
 	}
+	runArgs = append(runArgs, arg...)
 
-	tempDir, err := ioutil.TempDir("", "com.evilmonkeyinc")
-	if err != nil {
-		fmt.Println("failed to create temp directory")
-		panic(err)
-	}
-	defer os.RemoveAll(tempDir)
-
-	testExecutable = fmt.Sprintf("%s%cmarkdownconverter", tempDir, os.PathSeparator)
-
-	_, err = runCommand(
-		"go",
-		"build",
-		"-o="+testExecutable,
-		"-ldflags=-X 'main.Command=markdownconverter' -X 'main.Version="+version+"' -X 'main.OS="+goos+"' -X 'main.Arch="+goarch+"'",
-		fmt.Sprintf(".%ccmd%cmain.go", os.PathSeparator, os.PathSeparator),
-	)
-	if err != nil {
-		fmt.Println("cmd 'go build' failed")
-		panic(err)
-	}
-
-	os.Exit(m.Run())
-}
-
-func runCommand(command string, arg ...string) (string, error) {
-	cmd := exec.Command(
-		command,
-		arg...,
-	)
+	cmd := exec.Command("go", runArgs...)
 
 	stdErr, _ := cmd.StderrPipe()
 	stdOut, _ := cmd.StdoutPipe()
@@ -94,7 +57,7 @@ func Test_IntegrationTests(t *testing.T) {
 		{
 			name:     "exec_version",
 			args:     []string{"version"},
-			expected: fmt.Sprintf("version %s %s/%s\n", version, goos, goarch),
+			expected: "version dev /\n",
 		},
 		{
 			name:     "exec_help",
@@ -115,7 +78,7 @@ func Test_IntegrationTests(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			actual, err := runCommand(testExecutable, test.args...)
+			actual, err := runCommand(test.args...)
 			if err != nil {
 				assert.Fail(t, "execution failed", "test '%s' failed, %s", test.name, err.Error())
 				t.FailNow()
