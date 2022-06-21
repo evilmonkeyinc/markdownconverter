@@ -68,11 +68,10 @@ func printHelp(writer *os.File, flagset *flag.FlagSet) {
 }
 
 func outputError(err error) {
-	fmt.Printf("failed: %s\n", err.Error())
+	fmt.Fprintf(os.Stderr, "failed: %s\n", err.Error())
 	os.Exit(1)
 }
 
-// TODO : integration tests to verify flags vs args is done right and the same each time
 func main() {
 	var format, input, output string
 
@@ -97,7 +96,7 @@ func main() {
 		printHelp(os.Stdout, flagset)
 		return
 	case cmdVersion:
-		fmt.Printf("version %s %s/%s\n", Version, OS, Arch)
+		fmt.Fprintf(os.Stdout, "version %s %s/%s\n", Version, OS, Arch)
 		return
 	default:
 		break

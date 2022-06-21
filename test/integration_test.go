@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	helpText string = "markdownconverter is a tool for converting markdown to other formats\n\nUsage:\n\n  markdownconverter [format] [input] [output]\n\nExample:\n\n  markdownconverter slack \"[evilmonkeyinc](https://github.com/evilmonkeyinc)\"\n  > <https://github.com/evilmonkeyinc|evilmonkeyinc>\n\nOptions:\n\n  -f, --format string   The output format\n  -i, --input string    The input source file\n  -o, --output string   The output destination file. optional\n"
+	sampleHelpText string = "markdownconverter is a tool for converting markdown to other formats\n\nUsage:\n\n  markdownconverter [format] [input] [output]\n\nExample:\n\n  markdownconverter slack \"[evilmonkeyinc](https://github.com/evilmonkeyinc)\"\n  > <https://github.com/evilmonkeyinc|evilmonkeyinc>\n\nOptions:\n\n  -f, --format string   The output format\n  -i, --input string    The input source file\n  -o, --output string   The output destination file. optional\n"
 )
 
 func runCommand(arg ...string) (string, error) {
@@ -62,17 +62,42 @@ func Test_IntegrationTests(t *testing.T) {
 		{
 			name:     "exec_help",
 			args:     []string{"help"},
-			expected: helpText,
+			expected: sampleHelpText,
 		},
 		{
 			name:     "exec_help_flag",
 			args:     []string{"--help"},
-			expected: helpText,
+			expected: sampleHelpText,
 		},
 		{
 			name:     "exec_h_flag",
 			args:     []string{"-h"},
-			expected: helpText,
+			expected: sampleHelpText,
+		},
+		{
+			name:     "formartArg_inputArg",
+			args:     []string{"slack", "[evilmonkeyinc](https://github.com/evilmonkeyinc)"},
+			expected: "<https://github.com/evilmonkeyinc|evilmonkeyinc>\n",
+		},
+		{
+			name:     "formartFlag_inputArg",
+			args:     []string{"--format=slack", "[evilmonkeyinc](https://github.com/evilmonkeyinc)"},
+			expected: "<https://github.com/evilmonkeyinc|evilmonkeyinc>\n",
+		},
+		{
+			name:     "formartShortFlag_inputArg",
+			args:     []string{"-f=slack", "[evilmonkeyinc](https://github.com/evilmonkeyinc)"},
+			expected: "<https://github.com/evilmonkeyinc|evilmonkeyinc>\n",
+		},
+		{
+			name:     "inputArg_formartShortFlag",
+			args:     []string{"[evilmonkeyinc](https://github.com/evilmonkeyinc)", "-f=slack"},
+			expected: "<https://github.com/evilmonkeyinc|evilmonkeyinc>\n",
+		},
+		{
+			name:     "invalid_format",
+			args:     []string{"-f=invalid"},
+			expected: "failed: unexpected format 'invalid', expected: (slack, http)\nexit status 1\n",
 		},
 	}
 
