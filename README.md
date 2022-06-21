@@ -1,3 +1,7 @@
+[![codecov](https://codecov.io/gh/evilmonkeyinc/markdownconverter/branch/main/graph/badge.svg?token=4PU85I7J2R)](https://codecov.io/gh/evilmonkeyinc/markdownconverter)
+[![Push Main](https://github.com/evilmonkeyinc/markdownconverter/actions/workflows/push_main.yml/badge.svg?branch=main)](https://github.com/evilmonkeyinc/markdownconverter/actions/workflows/push_main.yml)
+[![Go Reference](https://pkg.go.dev/badge/github.com/evilmonkeyinc/markdownconverter.svg)](https://pkg.go.dev/github.com/evilmonkeyinc/markdownconverter)
+
 # Markdown Converter
 
 A simple command line tool that can perform markdown conversion to other formats
