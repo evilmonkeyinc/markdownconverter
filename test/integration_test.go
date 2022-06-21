@@ -36,7 +36,7 @@ func TestMain(m *testing.M) {
 	}
 	defer os.RemoveAll(tempDir)
 
-	testExecutable = fmt.Sprintf("%s/markdownconverter", tempDir)
+	testExecutable = fmt.Sprintf("%s%cmarkdownconverter", tempDir, os.PathSeparator)
 
 	out, err := runCommand(
 		"go",
