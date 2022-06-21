@@ -38,18 +38,17 @@ func TestMain(m *testing.M) {
 
 	testExecutable = fmt.Sprintf("%s%cmarkdownconverter", tempDir, os.PathSeparator)
 
-	out, err := runCommand(
+	_, err = runCommand(
 		"go",
 		"build",
-		"-o="+tempDir+"/markdownconverter",
+		"-o="+testExecutable,
 		"-ldflags=-X 'main.Command=markdownconverter' -X 'main.Version="+version+"' -X 'main.OS="+goos+"' -X 'main.Arch="+goarch+"'",
-		"./cmd/main.go",
+		fmt.Sprintf(".%ccmd%cmain.go", os.PathSeparator, os.PathSeparator),
 	)
 	if err != nil {
 		fmt.Println("cmd 'go build' failed")
 		panic(err)
 	}
-	fmt.Printf("built executable %s\n", out)
 
 	os.Exit(m.Run())
 }
