@@ -55,8 +55,8 @@ func loadConverters() (map[string]markdownconverter.Converter, []string) {
 	return converters, available
 }
 
-func printHelp(flagset *flag.FlagSet) {
-	writer := os.Stderr
+func printHelp(writer *os.File, flagset *flag.FlagSet) {
+	flagset.SetOutput(writer)
 	fmt.Fprintf(writer, "%s is a tool for converting markdown to other formats\n\n", Command)
 	fmt.Fprintf(writer, "Usage:\n\n")
 	fmt.Fprintf(writer, "  %s [format] [input] [output]\n", Command)
@@ -65,7 +65,6 @@ func printHelp(flagset *flag.FlagSet) {
 	fmt.Fprintf(writer, `  > <https://github.com/evilmonkeyinc|evilmonkeyinc>`+"\n")
 	fmt.Fprintf(writer, "\nOptions:\n\n")
 	flagset.PrintDefaults()
-	os.Exit(0)
 }
 
 func outputError(err error) {
@@ -85,15 +84,17 @@ func main() {
 	flagset.StringVarP(&output, "output", "o", "", "The output destination file. optional")
 	if err := flagset.Parse(os.Args[1:]); err != nil {
 		if !errors.Is(err, flag.ErrHelp) {
+			printHelp(os.Stderr, flagset)
 			outputError(err)
+			return
 		}
-		printHelp(flagset)
+		printHelp(os.Stdout, flagset)
 		return
 	}
 
 	switch flagset.Arg(0) {
 	case cmdHelp:
-		printHelp(flagset)
+		printHelp(os.Stdout, flagset)
 		return
 	case cmdVersion:
 		fmt.Printf("version %s %s/%s\n", Version, OS, Arch)
