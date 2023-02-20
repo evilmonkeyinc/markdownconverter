@@ -11,7 +11,7 @@ import (
 	"github.com/gomarkdown/markdown/parser"
 )
 
-// New returns a new instace of Converter
+// New returns a new instance of Converter
 func New() *Converter {
 	return &Converter{}
 }
