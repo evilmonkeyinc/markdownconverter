@@ -6,6 +6,7 @@ on:
     paths:
       - '**.go'
       - 'go.mod'
+permissions: write-all
 jobs:
   test:
     strategy:
