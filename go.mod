@@ -3,7 +3,7 @@ module github.com/evilmonkeyinc/markdownconverter
 go 1.17
 
 require (
-	github.com/gomarkdown/markdown v0.0.0-20221013030248-663e2500819c
+	github.com/gomarkdown/markdown v0.0.0-20231222211730-1d6d20845b47
 	github.com/stretchr/testify v1.8.2
 )
 
