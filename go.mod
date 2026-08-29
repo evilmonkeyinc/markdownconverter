@@ -4,8 +4,10 @@ go 1.17
 
 require (
 	github.com/gomarkdown/markdown v0.0.0-20221013030248-663e2500819c
-	github.com/stretchr/testify v1.8.2
+	github.com/stretchr/testify v1.12.1
 )
+
+require go.yaml.in/yaml/v3 v3.0.5 // indirect
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
