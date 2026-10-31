@@ -1,9 +1,9 @@
 module github.com/evilmonkeyinc/markdownconverter
 
-go 1.17
+go 1.22
 
 require (
-	github.com/gomarkdown/markdown v0.0.0-20221013030248-663e2500819c
+	github.com/gomarkdown/markdown v0.0.0-20261031165833-acfab5edc1ce
 	github.com/stretchr/testify v1.8.2
 )
 
